@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android AAB
 on:
   push:
     branches: [ main ]
@@ -11,9 +11,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: PWABuilder/pwa-github-actions-demo@v1
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+      - name: Build AAB
+        run: |
+          bubblewrap init --manifest https://orisaart.github.io/life-counter-app/manifest.json
+          bubblewrap build --skipPwaValidation
+      - name: Upload AAB
+        uses: actions/upload-artifact@v3
         with:
-          packageId: com.orisaart.lifecounter
-          host: https://orisaart.github.io
-          appVersion: 1.0.0
-          signingKeyAlias: my-key-alias
+          name: app-release
+          path: '*.aab'
