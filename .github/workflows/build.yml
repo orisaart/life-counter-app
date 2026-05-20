@@ -18,7 +18,7 @@ jobs:
           bubblewrap init --manifest https://orisaart.github.io/life-counter-app/manifest.json
           bubblewrap build --skipPwaValidation
       - name: Upload AAB
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: '*.aab'
