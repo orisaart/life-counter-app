@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>כמה זמן אני חי?</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .phone-frame {
+    width: 100%;
+    max-width: 380px;
+    background: #1a1a2e;
+    border-radius: 40px;
+    padding: 20px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    border: 8px solid #0f0f1e;
+  }
+  .screen {
+    background: linear-gradient(160deg, #2a2a4e 0%, #1a1a2e 100%);
+    border-radius: 28px;
+    padding: 30px 20px;
+    min-height: 700px;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 22px;
+    background: #0f0f1e;
+    border-radius: 0 0 15px 15px;
+    z-index: 10;
+  }
+  h1 {
+    font-size: 24px;
+    margin-top: 30px;
+    margin-bottom: 8px;
+    background: linear-gradient(45deg, #ffd700, #ff6b9d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #a0a0c0;
+    margin-bottom: 25px;
+  }
+  .input-section {
+    background: rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    font-size: 14px;
+    color: #c0c0e0;
+    margin-bottom: 10px;
+  }
+  input[type="date"] {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+    direction: ltr;
+    text-align: center;
+    cursor: pointer;
+  }
+  input[type="date"]:focus { outline: none; border-color: #ffd700; }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
+  button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(45deg, #ffd700, #ff6b9d);
+    color: #1a1a2e;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+    margin-top: 10px;
+  }
+  button:hover { transform: scale(1.02); }
+  button:active { transform: scale(0.98); }
+  button.secondary {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .results {
+    margin-top: 10px;
+    display: none;
+  }
+  .results.show { display: block; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-title {
+    text-align: right;
+    font-size: 15px;
+    color: #ffd700;
+    margin: 20px 5px 10px 5px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .stat-label {
+    font-size: 14px;
+    color: #c0c0e0;
+    display: flex;
+    align-items: center;
+  }
+  .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffd700;
+    direction: ltr;
+  }
+  .live-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    margin-left: 8px;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .milestone-card {
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,107,157,0.15));
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 8px;
+    text-align: right;
+  }
+  .milestone-title {
+    font-size: 14px;
+    color: #ffd700;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .milestone-desc {
+    font-size: 13px;
+    color: #c0c0e0;
+  }
+  .milestone-countdown {
+    font-size: 16px;
+    color: white;
+    font-weight: bold;
+    margin-top: 6px;
+    direction: ltr;
+    text-align: left;
+  }
+  .button-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+  }
+  .button-row button {
+    flex: 1;
+    margin-top: 0;
+    font-size: 14px;
+    padding: 12px;
+  }
+  .saved-notice {
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 15px;
+    font-size: 12px;
+    color: #4ade80;
+    display: none;
+  }
+  .saved-notice.show { display: block; }
+  .footer-note {
+    margin-top: 15px;
+    font-size: 11px;
+    color: #8080a0;
+    line-height: 1.5;
+  }
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4ade80;
+    color: #1a1a2e;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="screen">
+    <h1>כמה זמן אני חי?</h1>
+    <p class="subtitle">גלה את הזמן המדויק מאז שנולדת</p>
+
+    <div class="saved-notice" id="savedNotice">התאריך נשמר אוטומטית</div>
+
+    <div class="input-section" id="inputSection">
+      <label>הכנס את תאריך הלידה שלך</label>
+      <input type="date" id="birthDate">
+      <button onclick="calculate()">חשב</button>
+    </div>
+
+    <div class="results" id="results">
+      <div class="section-title">⏱️ הזמן שחיית <span class="live-indicator"></span></div>
+      <div class="stat-card">
+        <span class="stat-label">שנים</span>
+        <span class="stat-value" id="years">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">חודשים</span>
+        <span class="stat-value" id="months">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">שבועות</span>
+        <span class="stat-value" id="weeks">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">ימים</span>
+        <span class="stat-value" id="days">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">שעות</span>
+        <span class="stat-value" id="hours">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">דקות</span>
+        <span class="stat-value" id="minutes">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">שניות</span>
+        <span class="stat-value" id="seconds">0</span>
+      </div>
+
+      <div class="section-title">💫 עובדות מדהימות</div>
+      <div class="stat-card">
+        <span class="stat-label">❤️ פעימות לב</span>
+        <span class="stat-value" id="heartbeats">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">🫁 נשימות</span>
+        <span class="stat-value" id="breaths">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">🌍 הקפות סביב השמש</span>
+        <span class="stat-value" id="orbits">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">🌙 הקפות הירח</span>
+        <span class="stat-value" id="moonOrbits">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">😴 שעות שינה (כ-1/3)</span>
+        <span class="stat-value" id="sleepHours">0</span>
+      </div>
+
+      <div class="section-title">🎯 ציון הדרך הבא</div>
+      <div class="milestone-card" id="nextMilestone">
+        <div class="milestone-title" id="milestoneTitle">-</div>
+        <div class="milestone-desc" id="milestoneDesc">-</div>
+        <div class="milestone-countdown" id="milestoneCountdown">-</div>
+      </div>
+
+      <div class="button-row">
+        <button onclick="shareStats()">📤 שתף</button>
+        <button class="secondary" onclick="resetDate()">🔄 שנה תאריך</button>
+      </div>
+
+      <p class="footer-note">המספרים מתעדכנים בזמן אמת ⏰<br>הנתונים נשמרים במכשיר שלך בלבד</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">הועתק ללוח!</div>
+
+<script>
+  // קביעת תאריך מקסימלי = היום
+  document.getElementById('birthDate').max = new Date().toISOString().split('T')[0];
+
+  let birthTime = null;
+  let intervalId = null;
+
+  // טעינת תאריך שמור
+  window.addEventListener('load', () => {
+    try {
+      const saved = localStorage.getItem('birthDate');
+      if (saved) {
+        document.getElementById('birthDate').value = saved;
+        calculate(true);
+      }
+    } catch(e) { /* localStorage לא זמין */ }
+  });
+
+  function calculate(fromStorage = false) {
+    const birthInput = document.getElementById('birthDate').value;
+    if (!birthInput) {
+      alert('אנא בחר תאריך לידה');
+      return;
+    }
+    birthTime = new Date(birthInput).getTime();
+    if (birthTime > Date.now()) {
+      alert('תאריך הלידה לא יכול להיות בעתיד');
+      return;
+    }
+
+    // שמירה ב-localStorage
+    try {
+      localStorage.setItem('birthDate', birthInput);
+      if (!fromStorage) {
+        const notice = document.getElementById('savedNotice');
+        notice.classList.add('show');
+        setTimeout(() => notice.classList.remove('show'), 3000);
+      }
+    } catch(e) {}
+
+    document.getElementById('results').classList.add('show');
+    updateCounters();
+    if (intervalId) clearInterval(intervalId);
+    intervalId = setInterval(updateCounters, 1000);
+  }
+
+  function updateCounters() {
+    const now = Date.now();
+    const diff = now - birthTime;
+
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30.44);
+    const years = Math.floor(days / 365.25);
+
+    document.getElementById('seconds').textContent = seconds.toLocaleString('en-US');
+    document.getElementById('minutes').textContent = minutes.toLocaleString('en-US');
+    document.getElementById('hours').textContent = hours.toLocaleString('en-US');
+    document.getElementById('days').textContent = days.toLocaleString('en-US');
+    document.getElementById('weeks').textContent = weeks.toLocaleString('en-US');
+    document.getElementById('months').textContent = months.toLocaleString('en-US');
+    document.getElementById('years').textContent = years.toLocaleString('en-US');
+
+    // עובדות מדהימות
+    // פעימת לב ממוצעת: 80 לדקה
+    const heartbeats = Math.floor(minutes * 80);
+    // נשימה ממוצעת: 16 לדקה
+    const breaths = Math.floor(minutes * 16);
+    // הקפת השמש: 365.25 ימים
+    const orbits = (days / 365.25).toFixed(2);
+    // הקפת הירח: 27.32 ימים
+    const moonOrbits = Math.floor(days / 27.32);
+    // שעות שינה: שליש מהזמן
+    const sleepHours = Math.floor(hours / 3);
+
+    document.getElementById('heartbeats').textContent = heartbeats.toLocaleString('en-US');
+    document.getElementById('breaths').textContent = breaths.toLocaleString('en-US');
+    document.getElementById('orbits').textContent = orbits;
+    document.getElementById('moonOrbits').textContent = moonOrbits.toLocaleString('en-US');
+    document.getElementById('sleepHours').textContent = sleepHours.toLocaleString('en-US');
+
+    // ציון הדרך הבא
+    updateNextMilestone(days, years);
+  }
+
+  function updateNextMilestone(currentDays, currentYears) {
+    const milestones = [
+      { days: 1000, title: '1,000 ימים', desc: 'מילסטון ראשון מרשים!' },
+      { days: 5000, title: '5,000 ימים', desc: 'כבר וותיק במשחק החיים' },
+      { days: 10000, title: '10,000 ימים', desc: 'מילסטון נדיר ומיוחד' },
+      { days: 15000, title: '15,000 ימים', desc: 'חכמת חיים מרשימה' },
+      { days: 20000, title: '20,000 ימים', desc: 'מרהיב!' },
+      { days: 25000, title: '25,000 ימים', desc: 'אגדה' },
+      { days: 30000, title: '30,000 ימים', desc: 'יוצא דופן' },
+    ];
+
+    // הוסף גם ציוני שנים עגולים
+    const nextRoundYear = Math.ceil((currentYears + 0.01) / 5) * 5;
+    const yearsMilestoneDays = Math.floor(nextRoundYear * 365.25);
+
+    let nextMilestone = milestones.find(m => m.days > currentDays);
+    if (!nextMilestone || yearsMilestoneDays < nextMilestone.days) {
+      nextMilestone = {
+        days: yearsMilestoneDays,
+        title: `יום הולדת ${nextRoundYear}`,
+        desc: `החגיגה הבאה שלך!`
+      };
+    }
+
+    const daysLeft = nextMilestone.days - currentDays;
+    const targetDate = new Date(birthTime + nextMilestone.days * 86400000);
+    const dateStr = targetDate.toLocaleDateString('he-IL');
+
+    document.getElementById('milestoneTitle').textContent = nextMilestone.title;
+    document.getElementById('milestoneDesc').textContent = nextMilestone.desc + ` (${dateStr})`;
+    document.getElementById('milestoneCountdown').textContent =
+      `עוד ${daysLeft.toLocaleString('en-US')} ימים`;
+  }
+
+  function shareStats() {
+    const days = document.getElementById('days').textContent;
+    const hours = document.getElementById('hours').textContent;
+    const minutes = document.getElementById('minutes').textContent;
+    const heartbeats = document.getElementById('heartbeats').textContent;
+
+    const text = `🎉 כמה זמן אני חי?\n\n` +
+      `⏱️ ${days} ימים\n` +
+      `🕐 ${hours} שעות\n` +
+      `⏰ ${minutes} דקות\n` +
+      `❤️ ${heartbeats} פעימות לב\n\n` +
+      `נסה גם אתה! 💫`;
+
+    if (navigator.share) {
+      navigator.share({ title: 'כמה זמן אני חי?', text: text })
+        .catch(() => copyToClipboard(text));
+    } else {
+      copyToClipboard(text);
+    }
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => showToast('הועתק ללוח!'));
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('הועתק ללוח!');
+      } catch(e) {
+        showToast('שגיאה בהעתקה');
+      }
+      document.body.removeChild(ta);
+    }
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function resetDate() {
+    if (confirm('האם לאפס את התאריך השמור?')) {
+      try { localStorage.removeItem('birthDate'); } catch(e) {}
+      document.getElementById('birthDate').value = '';
+      document.getElementById('results').classList.remove('show');
+      if (intervalId) clearInterval(intervalId);
+    }
+  }
+</script>
+</body>
+</html>
